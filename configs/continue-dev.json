@@ -1,0 +1,15 @@
+{
+  "models": [
+    {
+      "title": "Continue with VecTrade",
+      "provider": "mcp",
+      "mcpServer": {
+        "command": "npx",
+        "args": ["-y", "@vectrade/mcp-server"],
+        "env": {
+          "VECTRADE_API_KEY": "${env:VECTRADE_API_KEY}"
+        }
+      }
+    }
+  ]
+}

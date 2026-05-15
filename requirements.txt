@@ -1,0 +1,19 @@
+# VecTrade MCP Server Dependencies
+# Model Context Protocol server for AI IDE integration
+
+# Core server
+starlette>=0.37.0,<1.0
+uvicorn[standard]>=0.29.0,<1.0
+sse-starlette>=2.0.0,<3.0
+
+# HTTP client for VecTrade API
+httpx>=0.27.0,<1.0
+
+# Data validation
+pydantic>=2.7.0,<3.0
+
+# Configuration
+python-dotenv>=1.0.0,<2.0
+
+# Logging
+structlog>=24.1.0,<25.0
