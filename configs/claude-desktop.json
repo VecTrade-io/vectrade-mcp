@@ -4,7 +4,7 @@
       "command": "npx",
       "args": ["-y", "@vectrade/mcp-server"],
       "env": {
-        "VECTRADE_API_KEY": "YOUR_API_KEY_HERE"
+        "VECTRADE_API_KEY": "${env:VECTRADE_API_KEY}"
       }
     }
   }

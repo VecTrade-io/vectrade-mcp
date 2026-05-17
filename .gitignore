@@ -35,5 +35,10 @@ Thumbs.db
 # Node (for npx/mcp-server)
 node_modules/
 
+# Caches
+.ruff_cache/
+.pytest_cache/
+.coverage
+
 # Logs
 *.log

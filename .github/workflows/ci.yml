@@ -27,11 +27,8 @@ jobs:
       - name: Install dependencies
         run: pip install pytest pytest-cov
 
-      - name: Run tests
-        run: pytest --cov=vectrade_mcp --cov-report=xml --cov-report=term-missing
-
-      - name: Enforce 90 % coverage
-        run: pytest --cov=vectrade_mcp --cov-fail-under=90 -q
+      - name: Run tests with coverage
+        run: pytest --cov=vectrade_mcp --cov-report=xml --cov-report=term-missing --cov-fail-under=90
 
   lint:
     runs-on: ubuntu-latest

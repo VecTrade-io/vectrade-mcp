@@ -9,6 +9,7 @@ import json
 import os
 import stat
 import sys
+import typing as tp
 from pathlib import Path
 
 # MCP server configuration template injected into IDE config files.
@@ -106,7 +107,7 @@ def setup_ide(
     api_key: str,
     *,
     home: Path | None = None,
-    _print: object = print,
+    _print: tp.Callable[..., object] = print,
 ) -> Path:
     """Configure MCP for a specific IDE.
 

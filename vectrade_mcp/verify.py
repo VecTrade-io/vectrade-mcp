@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import urllib.error
 import urllib.request
 
 _API_BASE = "https://api.vectrade.io"
@@ -60,7 +61,7 @@ def main() -> None:
     try:
         data = verify_connection(api_key)
         print(f"  ✓ API reachable (status: {data.get('status', 'ok')})")
-    except Exception as exc:
+    except (urllib.error.URLError, OSError) as exc:
         print(f"  ✗ API unreachable: {exc}")
         sys.exit(1)
 
