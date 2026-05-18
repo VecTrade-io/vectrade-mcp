@@ -205,6 +205,7 @@ class TestSetupIde:
         assert path.exists()
         assert "Claude" in str(path)
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="NTFS lacks Unix permission bits")
     def test_sets_unix_permissions(
         self, tmp_home: Path, valid_api_key: str, monkeypatch: pytest.MonkeyPatch
     ) -> None:
