@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vectrade-mcp"
+version = "0.1.0"
+description = "Zero-config MCP setup for VecTrade financial tools in AI IDEs"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "VecTrade", email = "sdk@vectrade.io" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Typing :: Typed",
+]
+
+[project.scripts]
+vectrade-mcp-setup = "vectrade_mcp.setup_wizard:main"
+vectrade-mcp-verify = "vectrade_mcp.verify:main"
+
+[project.urls]
+Homepage = "https://github.com/VecTrade-io/vectrade-mcp"
+Documentation = "https://docs.vectrade.io/sdks/mcp"
+Repository = "https://github.com/VecTrade-io/vectrade-mcp"
+Issues = "https://github.com/VecTrade-io/vectrade-mcp/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "S"]
+ignore = ["S603", "S607"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.coverage.run]
+source = ["vectrade_mcp"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90

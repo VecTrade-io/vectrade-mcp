@@ -2,7 +2,7 @@ FROM python:3.12-slim AS base
 
 LABEL org.opencontainers.image.title="VecTrade MCP Server"
 LABEL org.opencontainers.image.description="Model Context Protocol server for AI IDE integration"
-LABEL org.opencontainers.image.source="https://github.com/VecTrade-io/vectrade-tech"
+LABEL org.opencontainers.image.source="https://github.com/VecTrade-io/vectrade-mcp"
 LABEL org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONUNBUFFERED=1 \
@@ -17,10 +17,10 @@ RUN adduser --system --no-create-home --group mcp && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY requirements.txt pyproject.toml ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src/ ./src/
+COPY vectrade_mcp/ ./vectrade_mcp/
 COPY scripts/ ./scripts/
 
 USER mcp
@@ -30,4 +30,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 EXPOSE 8080
 
-ENTRYPOINT ["python", "-m", "src.server"]
+ENTRYPOINT ["python", "-m", "vectrade_mcp.verify"]

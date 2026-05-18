@@ -1,5 +1,6 @@
 # VecTrade MCP Integration Kit
 
+[![CI](https://github.com/VecTrade-io/vectrade-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/VecTrade-io/vectrade-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/VecTrade-io/vectrade-mcp)](LICENSE)
 
 Zero-config setup for VecTrade financial tools in AI IDEs.
@@ -9,13 +10,13 @@ Zero-config setup for VecTrade financial tools in AI IDEs.
 ## Installation
 
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
-Or run with Docker:
+Or install development dependencies for contributing:
 
 ```bash
-cd docker && docker compose up -d
+pip install -r requirements.txt
 ```
 
 ## Quick Setup (60 seconds)
@@ -23,7 +24,9 @@ cd docker && docker compose up -d
 ### Option 1: Interactive Setup
 
 ```bash
-python scripts/setup.py
+python -m vectrade_mcp.setup_wizard
+# or, if installed:
+vectrade-mcp-setup
 ```
 
 ### Option 2: Manual Configuration
@@ -63,8 +66,20 @@ See [TOOLS.md](TOOLS.md) for the full list of 27 available tools.
 
 ```bash
 export VECTRADE_API_KEY=vq_live_...
-python scripts/verify.py
+python -m vectrade_mcp.verify
+# or, if installed:
+vectrade-mcp-verify
 ```
+
+## Development
+
+```bash
+pip install -r requirements.txt
+pytest --cov=vectrade_mcp --cov-report=term-missing
+ruff check .
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## Requirements
 
