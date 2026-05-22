@@ -43,7 +43,7 @@ def verify_connection(
     url = f"{base_url}{_HEALTH_PATH}"
     req = urllib.request.Request(  # noqa: S310
         url,
-        headers={"Authorization": f"Bearer {api_key}"},
+        headers={"X-API-Key": api_key, "User-Agent": "vectrade-mcp/0.1.0"},
     )
     with urllib.request.urlopen(req, timeout=timeout) as response:  # noqa: S310
         return json.loads(response.read())
