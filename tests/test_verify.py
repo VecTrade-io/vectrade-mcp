@@ -88,7 +88,7 @@ class TestVerifyConnection:
             # Verify the request was made with correct auth header
             call_args = mock_open.call_args
             req = call_args[0][0]
-            assert req.get_header("Authorization") == "Bearer vq_test_key"
+            assert req.get_header("X-api-key") == "vq_test_key"
 
     def test_custom_base_url(self) -> None:
         body = {"status": "ok"}
