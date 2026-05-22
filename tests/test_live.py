@@ -132,8 +132,7 @@ class TestRateLimits:
             headers = dict(resp.headers)
             # Check for rate limit or standard API headers
             has_api_headers = any(
-                k.lower().startswith(("x-ratelimit", "x-content", "cf-"))
-                for k in headers
+                k.lower().startswith(("x-ratelimit", "x-content", "cf-")) for k in headers
             )
             assert has_api_headers, f"No expected headers found: {list(headers.keys())}"
 
@@ -149,9 +148,9 @@ class TestPlanLimits:
         assert status == 200
         # Should have some quota-related field
         text = json.dumps(data).lower()
-        assert any(
-            w in text for w in ("remaining", "limit", "quota", "used", "total")
-        ), f"No quota info found in: {data}"
+        assert any(w in text for w in ("remaining", "limit", "quota", "used", "total")), (
+            f"No quota info found in: {data}"
+        )
 
 
 # ── Health endpoint ──
