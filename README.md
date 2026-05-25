@@ -84,7 +84,56 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 ## Requirements
 
 - Node.js 18+ (for `npx` execution)
-- VecTrade API key ([get one free](https://app.vectrade.io/keys))
+- VecTrade API key ([get one free](https://vectrade.io/vtrade/developer))
+
+## Hosted MCP (Zero Install)
+
+Use VecTrade's hosted MCP server — no local setup needed. Just add the remote URL to your IDE config:
+
+**Streamable HTTP (recommended):**
+```json
+{
+  "mcpServers": {
+    "vectrade": {
+      "url": "https://mcp.vectrade.io/mcp",
+      "headers": {
+        "X-API-Key": "vq_live_..."
+      }
+    }
+  }
+}
+```
+
+**Legacy SSE:**
+```json
+{
+  "mcpServers": {
+    "vectrade": {
+      "url": "https://mcp.vectrade.io/sse",
+      "headers": {
+        "X-API-Key": "vq_live_..."
+      }
+    }
+  }
+}
+```
+
+The hosted server uses the same API key authentication and plan limits as the REST API.
+
+## Self-Hosting
+
+To run the MCP server on your own infrastructure:
+
+```bash
+# Build and run
+npm run build
+PORT=3200 VECTRADE_API_KEY=vq_live_... npm start         # Streamable HTTP
+PORT=3200 VECTRADE_API_KEY=vq_live_... npm run start:sse  # Legacy SSE
+
+# Docker
+docker build -t vectrade-mcp .
+docker run -p 3200:3200 -e VECTRADE_API_KEY=vq_live_... vectrade-mcp
+```
 
 ## Documentation
 
