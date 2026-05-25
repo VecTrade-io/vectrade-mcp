@@ -41,10 +41,14 @@ async function startStreamableHTTPServer(): Promise<void> {
   const { StreamableHTTPServerTransport } = await import(
     "@modelcontextprotocol/sdk/server/streamableHttp.js"
   );
+  const { SSEServerTransport } = await import(
+    "@modelcontextprotocol/sdk/server/sse.js"
+  );
   const { createServer: createHTTPServer } = await import("node:http");
   const port = parseInt(process.env.PORT || "3200", 10);
 
   const sessions = new Map<string, { server: ReturnType<typeof createServer>; transport: InstanceType<typeof StreamableHTTPServerTransport> }>();
+  const sseSessions = new Map<string, { server: ReturnType<typeof createServer>; transport: InstanceType<typeof SSEServerTransport> }>();
 
   const httpServer = createHTTPServer(async (req, res) => {
     // CORS for browser-based clients
@@ -121,18 +125,46 @@ async function startStreamableHTTPServer(): Promise<void> {
       return;
     }
 
+    // Legacy SSE transport endpoints (for VS Code and other SSE-only clients)
+    if (req.url === "/sse" && req.method === "GET") {
+      const transport = new SSEServerTransport("/messages", res);
+      const server = createServer();
+      await server.connect(transport);
+      const sid = crypto.randomUUID();
+      sseSessions.set(sid, { server, transport });
+      transport.onclose = () => sseSessions.delete(sid);
+      return;
+    }
+
+    if (req.url?.startsWith("/messages") && req.method === "POST") {
+      const url = new URL(req.url, `http://localhost:${port}`);
+      const sessionId = url.searchParams.get("sessionId");
+      const session = sessionId ? sseSessions.get(sessionId) : [...sseSessions.values()].at(-1);
+      if (session) {
+        await session.transport.handlePostMessage(req, res);
+      } else {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "No active SSE session" }));
+      }
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Not found. Use /mcp or /health." }));
+    res.end(JSON.stringify({ error: "Not found. Use /mcp, /sse, or /health." }));
   });
 
   httpServer.listen(port, () => {
-    console.error(`VecTrade MCP Server (Streamable HTTP) listening on :${port}`);
-    console.error(`  → Endpoint: http://localhost:${port}/mcp`);
-    console.error(`  → Health:   http://localhost:${port}/health`);
+    console.error(`VecTrade MCP Server listening on :${port}`);
+    console.error(`  → Streamable HTTP: http://localhost:${port}/mcp`);
+    console.error(`  → Legacy SSE:      http://localhost:${port}/sse`);
+    console.error(`  → Health:          http://localhost:${port}/health`);
   });
 
   process.on("SIGINT", async () => {
     for (const { server } of sessions.values()) {
+      await server.close();
+    }
+    for (const { server } of sseSessions.values()) {
       await server.close();
     }
     httpServer.close();
