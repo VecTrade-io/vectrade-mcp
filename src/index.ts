@@ -72,6 +72,13 @@ async function startStreamableHTTPServer(): Promise<void> {
 
     // All MCP traffic goes through /mcp
     if (req.url === "/mcp") {
+      // Normalize Accept header — some clients send */* or omit required types.
+      // The SDK requires both application/json and text/event-stream.
+      const accept = req.headers["accept"] || "";
+      if (accept.includes("*/*") || !accept.includes("text/event-stream") || !accept.includes("application/json")) {
+        req.headers["accept"] = "application/json, text/event-stream";
+      }
+
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
       if (sessionId && sessions.has(sessionId)) {
