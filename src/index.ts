@@ -74,9 +74,18 @@ async function startStreamableHTTPServer(): Promise<void> {
     if (req.url === "/mcp") {
       // Normalize Accept header — some clients send */* or omit required types.
       // The SDK requires both application/json and text/event-stream.
+      // Must patch both req.headers AND req.rawHeaders since @hono/node-server
+      // reads from rawHeaders when converting to Web Standard Request.
       const accept = req.headers["accept"] || "";
       if (accept.includes("*/*") || !accept.includes("text/event-stream") || !accept.includes("application/json")) {
-        req.headers["accept"] = "application/json, text/event-stream";
+        const normalized = "application/json, text/event-stream";
+        req.headers["accept"] = normalized;
+        for (let i = 0; i < req.rawHeaders.length; i += 2) {
+          if (req.rawHeaders[i].toLowerCase() === "accept") {
+            req.rawHeaders[i + 1] = normalized;
+            break;
+          }
+        }
       }
 
       const sessionId = req.headers["mcp-session-id"] as string | undefined;
