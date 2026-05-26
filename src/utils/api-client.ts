@@ -1,6 +1,12 @@
 /**
  * VecTrade API HTTP client.
+ *
+ * Resolves the API key in this priority:
+ *  1. Per-request key from X-API-Key header (via AsyncLocalStorage context)
+ *  2. VECTRADE_API_KEY environment variable (for local stdio usage)
  */
+
+import { getRequestApiKey } from "./request-context.js";
 
 const DEFAULT_BASE_URL = "https://api.vectrade.io/v1";
 const DEFAULT_TIMEOUT = 30_000;
@@ -18,23 +24,26 @@ interface APIError {
 
 export class VecTradeAPIClient {
   private readonly baseUrl: string;
-  private readonly apiKey: string;
   private readonly timeout: number;
 
   constructor() {
-    this.apiKey = process.env.VECTRADE_API_KEY || "";
     this.baseUrl = process.env.VECTRADE_BASE_URL || DEFAULT_BASE_URL;
     this.timeout = parseInt(
       process.env.VECTRADE_TIMEOUT || String(DEFAULT_TIMEOUT),
       10
     );
+  }
 
-    if (!this.apiKey) {
+  private resolveApiKey(): string {
+    const key = getRequestApiKey() || process.env.VECTRADE_API_KEY || "";
+    if (!key) {
       throw new Error(
-        "VECTRADE_API_KEY environment variable is required. " +
+        "API key required. Pass X-API-Key header (hosted) or set " +
+          "VECTRADE_API_KEY env var (local). " +
           "Get a free key at https://vectrade.io/vtrade/developer"
       );
     }
+    return key;
   }
 
   async get<T = unknown>(path: string, params?: Record<string, string>): Promise<T> {
@@ -50,7 +59,7 @@ export class VecTradeAPIClient {
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
-        "X-API-Key": this.apiKey,
+        "X-API-Key": this.resolveApiKey(),
         "User-Agent": "vectrade-mcp-server/1.0.0",
         Accept: "application/json",
       },
@@ -78,7 +87,7 @@ export class VecTradeAPIClient {
     const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
-        "X-API-Key": this.apiKey,
+        "X-API-Key": this.resolveApiKey(),
         "User-Agent": "vectrade-mcp-server/1.0.0",
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -103,12 +112,9 @@ export class VecTradeAPIClient {
   }
 }
 
-// Singleton instance
-let client: VecTradeAPIClient | null = null;
+// Singleton instance (safe to create eagerly — API key resolved per-request)
+const client = new VecTradeAPIClient();
 
 export function getClient(): VecTradeAPIClient {
-  if (!client) {
-    client = new VecTradeAPIClient();
-  }
   return client;
 }

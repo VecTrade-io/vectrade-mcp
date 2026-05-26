@@ -9,6 +9,7 @@
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createServer } from "./server.js";
+import { requestContext } from "./utils/request-context.js";
 
 async function main(): Promise<void> {
   const mode = process.argv.includes("--http")
@@ -51,6 +52,9 @@ async function startStreamableHTTPServer(): Promise<void> {
   const sseSessions = new Map<string, { server: ReturnType<typeof createServer>; transport: InstanceType<typeof SSEServerTransport> }>();
 
   const httpServer = createHTTPServer(async (req, res) => {
+    // Extract API key from header and run in request-scoped context
+    const apiKey = (req.headers["x-api-key"] as string) || "";
+    await requestContext.run({ apiKey }, async () => {
     // CORS for browser-based clients
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
@@ -151,6 +155,7 @@ async function startStreamableHTTPServer(): Promise<void> {
 
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Not found. Use /mcp, /sse, or /health." }));
+    }); // end requestContext.run
   });
 
   httpServer.listen(port, () => {
@@ -189,6 +194,8 @@ async function startSSEServer(): Promise<void> {
   const sessions = new Map<string, { server: ReturnType<typeof createServer>; transport: InstanceType<typeof SSEServerTransport> }>();
 
   const httpServer = createHTTPServer(async (req, res) => {
+    const apiKey = (req.headers["x-api-key"] as string) || "";
+    await requestContext.run({ apiKey }, async () => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-API-Key");
@@ -236,6 +243,7 @@ async function startSSEServer(): Promise<void> {
 
     res.writeHead(404);
     res.end("Not found");
+    }); // end requestContext.run
   });
 
   httpServer.listen(port, () => {
