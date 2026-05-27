@@ -8,7 +8,7 @@
 
 import { getRequestApiKey } from "./request-context.js";
 
-const DEFAULT_BASE_URL = "https://api.vectrade.io/v1";
+const DEFAULT_BASE_URL = "https://api.vectrade.io/v1/vq/";
 const DEFAULT_TIMEOUT = 30_000;
 
 interface APIResponse<T = unknown> {
@@ -46,8 +46,14 @@ export class VecTradeAPIClient {
     return key;
   }
 
+  private async handleError(response: Response): Promise<never> {
+    const error = await response.json().catch(() => ({}));
+    const message = error.message || error.detail || response.statusText;
+    throw new Error(`VecTrade API error (${response.status}): ${message}`);
+  }
+
   async get<T = unknown>(path: string, params?: Record<string, string>): Promise<T> {
-    const url = new URL(path, this.baseUrl);
+    const url = new URL(path.replace(/^\//, ""), this.baseUrl);
     if (params) {
       for (const [key, value] of Object.entries(params)) {
         if (value !== undefined && value !== "") {
@@ -66,23 +72,14 @@ export class VecTradeAPIClient {
       signal: AbortSignal.timeout(this.timeout),
     });
 
-    if (!response.ok) {
-      const error = (await response.json().catch(() => ({
-        message: response.statusText,
-        code: "UNKNOWN",
-        status: response.status,
-      }))) as APIError;
-      throw new Error(
-        `VecTrade API error (${error.status}): ${error.message}`
-      );
-    }
+    if (!response.ok) await this.handleError(response);
 
-    const body = (await response.json()) as APIResponse<T>;
-    return body.data;
+    const body = await response.json();
+    return (body.data ?? body) as T;
   }
 
   async post<T = unknown>(path: string, data?: unknown): Promise<T> {
-    const url = new URL(path, this.baseUrl);
+    const url = new URL(path.replace(/^\//, ""), this.baseUrl);
 
     const response = await fetch(url.toString(), {
       method: "POST",
@@ -96,19 +93,10 @@ export class VecTradeAPIClient {
       signal: AbortSignal.timeout(this.timeout),
     });
 
-    if (!response.ok) {
-      const error = (await response.json().catch(() => ({
-        message: response.statusText,
-        code: "UNKNOWN",
-        status: response.status,
-      }))) as APIError;
-      throw new Error(
-        `VecTrade API error (${error.status}): ${error.message}`
-      );
-    }
+    if (!response.ok) await this.handleError(response);
 
-    const body = (await response.json()) as APIResponse<T>;
-    return body.data;
+    const body = await response.json();
+    return (body.data ?? body) as T;
   }
 }
 

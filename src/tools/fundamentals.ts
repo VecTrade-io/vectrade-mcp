@@ -1,88 +1,37 @@
 /**
- * Fundamentals tools (5 tools).
+ * Fundamentals tools (4 tools).
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getClient } from "../utils/api-client.js";
-import {
-  formatFundamentals,
-  formatFinancialStatement,
-  formatGeneric,
-} from "../utils/formatters.js";
+import { formatGeneric } from "../utils/formatters.js";
 
 export function registerFundamentalTools(server: McpServer): void {
   server.tool(
     "get_fundamentals",
-    "Get company fundamental data including P/E, EPS, margins, and valuation metrics",
+    "Get company fundamental data including P/E, EPS, market cap, margins, and valuation metrics",
     { symbol: z.string().describe("Stock ticker symbol") },
     async ({ symbol }) => {
       const data = await getClient().get<Record<string, unknown>>(
-        `/fundamentals/${encodeURIComponent(symbol)}`
+        `/fundamentals/${encodeURIComponent(symbol.toUpperCase())}`
       );
-      return { content: [{ type: "text", text: formatFundamentals(data) }] };
+      return { content: [{ type: "text", text: formatGeneric(data, `${symbol.toUpperCase()} Fundamentals`) }] };
     }
   );
 
   server.tool(
-    "get_income_statement",
-    "Get income statement — revenue, COGS, operating income, net income, EPS",
+    "get_financial_statements",
+    "Get income statement, balance sheet, and cash flow statement for a company",
     {
       symbol: z.string().describe("Stock ticker symbol"),
-      period: z
-        .enum(["annual", "quarterly"])
-        .default("annual")
-        .describe("Reporting period"),
     },
-    async ({ symbol, period }) => {
+    async ({ symbol }) => {
       const data = await getClient().get<Record<string, unknown>>(
-        `/fundamentals/${encodeURIComponent(symbol)}/income`,
-        { period }
+        `/fundamentals/${encodeURIComponent(symbol.toUpperCase())}/statements`
       );
       return {
-        content: [{ type: "text", text: formatFinancialStatement(data, "Income Statement") }],
-      };
-    }
-  );
-
-  server.tool(
-    "get_balance_sheet",
-    "Get balance sheet — assets, liabilities, shareholders equity",
-    {
-      symbol: z.string().describe("Stock ticker symbol"),
-      period: z
-        .enum(["annual", "quarterly"])
-        .default("annual")
-        .describe("Reporting period"),
-    },
-    async ({ symbol, period }) => {
-      const data = await getClient().get<Record<string, unknown>>(
-        `/fundamentals/${encodeURIComponent(symbol)}/balance-sheet`,
-        { period }
-      );
-      return {
-        content: [{ type: "text", text: formatFinancialStatement(data, "Balance Sheet") }],
-      };
-    }
-  );
-
-  server.tool(
-    "get_cash_flow",
-    "Get cash flow statement — operating, investing, financing activities",
-    {
-      symbol: z.string().describe("Stock ticker symbol"),
-      period: z
-        .enum(["annual", "quarterly"])
-        .default("annual")
-        .describe("Reporting period"),
-    },
-    async ({ symbol, period }) => {
-      const data = await getClient().get<Record<string, unknown>>(
-        `/fundamentals/${encodeURIComponent(symbol)}/cash-flow`,
-        { period }
-      );
-      return {
-        content: [{ type: "text", text: formatFinancialStatement(data, "Cash Flow Statement") }],
+        content: [{ type: "text", text: formatGeneric(data, `${symbol.toUpperCase()} Financial Statements`) }],
       };
     }
   );
@@ -93,10 +42,24 @@ export function registerFundamentalTools(server: McpServer): void {
     { symbol: z.string().describe("Stock ticker symbol") },
     async ({ symbol }) => {
       const data = await getClient().get<Record<string, unknown>>(
-        `/fundamentals/${encodeURIComponent(symbol)}/profile`
+        `/profile/${encodeURIComponent(symbol.toUpperCase())}`
       );
       return {
-        content: [{ type: "text", text: formatGeneric(data, `${symbol} Company Profile`) }],
+        content: [{ type: "text", text: formatGeneric(data, `${symbol.toUpperCase()} Company Profile`) }],
+      };
+    }
+  );
+
+  server.tool(
+    "get_earnings",
+    "Get earnings history, consensus estimates, and upcoming earnings data",
+    { symbol: z.string().describe("Stock ticker symbol") },
+    async ({ symbol }) => {
+      const data = await getClient().get<Record<string, unknown>>(
+        `/earnings/${encodeURIComponent(symbol.toUpperCase())}`
+      );
+      return {
+        content: [{ type: "text", text: formatGeneric(data, `${symbol.toUpperCase()} Earnings`) }],
       };
     }
   );

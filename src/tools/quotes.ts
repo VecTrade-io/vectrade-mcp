@@ -1,5 +1,5 @@
 /**
- * Quotes & Market Data tools (5 tools).
+ * Quotes & Market Data tools (3 tools).
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -14,7 +14,7 @@ export function registerQuoteTools(server: McpServer): void {
     { symbol: z.string().describe("Stock ticker symbol (e.g., AAPL)") },
     async ({ symbol }) => {
       const data = await getClient().get<Record<string, unknown>>(
-        `/quotes/${encodeURIComponent(symbol)}`
+        `/quotes/${encodeURIComponent(symbol.toUpperCase())}`
       );
       return { content: [{ type: "text", text: formatQuote(data) }] };
     }
@@ -32,9 +32,10 @@ export function registerQuoteTools(server: McpServer): void {
     async ({ symbols }) => {
       const data = await getClient().get<Record<string, unknown>[]>(
         "/quotes/batch",
-        { symbols: symbols.join(",") }
+        { symbols: symbols.map((s) => s.toUpperCase()).join(",") }
       );
-      const text = data.map((q) => formatQuote(q)).join("\n\n---\n\n");
+      const items = Array.isArray(data) ? data : [data];
+      const text = items.map((q) => formatQuote(q)).join("\n\n---\n\n");
       return { content: [{ type: "text", text }] };
     }
   );
@@ -55,49 +56,11 @@ export function registerQuoteTools(server: McpServer): void {
     },
     async ({ symbol, interval, period }) => {
       const data = await getClient().get<Record<string, unknown>>(
-        `/quotes/${encodeURIComponent(symbol)}/history`,
+        `/quotes/${encodeURIComponent(symbol.toUpperCase())}/history`,
         { interval, period }
       );
       return {
-        content: [{ type: "text", text: formatGeneric(data, `${symbol} Historical Prices`) }],
-      };
-    }
-  );
-
-  server.tool(
-    "get_market_movers",
-    "Get top market movers — gainers, losers, or most active stocks",
-    {
-      type: z
-        .enum(["gainers", "losers", "active"])
-        .describe("Type of movers to retrieve"),
-    },
-    async ({ type }) => {
-      const data = await getClient().get<Record<string, unknown>[]>(
-        `/market/movers/${type}`
-      );
-      const lines = data.map(
-        (s) => `- **${s.symbol}** ${s.name}: $${s.price} (${s.changePercent}%)`
-      );
-      return {
-        content: [{ type: "text", text: `## Market ${type}\n\n${lines.join("\n")}` }],
-      };
-    }
-  );
-
-  server.tool(
-    "get_market_status",
-    "Check if the stock market is currently open or closed",
-    {},
-    async () => {
-      const data = await getClient().get<Record<string, unknown>>("/market/status");
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Market is **${data.isOpen ? "OPEN" : "CLOSED"}**. ${data.message || ""}`.trim(),
-          },
-        ],
+        content: [{ type: "text", text: formatGeneric(data, `${symbol.toUpperCase()} Historical Prices`) }],
       };
     }
   );
