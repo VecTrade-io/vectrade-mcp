@@ -10,10 +10,16 @@ Zero-config setup for VecTrade financial tools in AI IDEs.
 ## Installation
 
 ```bash
-pip install .
+pip install vectrade-mcp
 ```
 
-Or install development dependencies for contributing:
+Or with [uvx](https://docs.astral.sh/uv/):
+
+```bash
+uvx vectrade-mcp-setup
+```
+
+For development:
 
 ```bash
 pip install -r requirements.txt
@@ -138,6 +144,13 @@ docker run -p 3200:3200 -e VECTRADE_API_KEY=vq_live_... vectrade-mcp
 ## Documentation
 
 Full docs at [docs.vectrade.io/mcp](https://docs.vectrade.io/sdks/mcp).
+
+## Community
+
+- 💬 [Discord](https://discord.gg/vectrade) — Get help, share prompts, discuss MCP workflows
+- 📖 [MCP Directory](https://modelcontextprotocol.io) — Discover other MCP servers
+- 🐍 [finkit](https://github.com/VecTrade-io/finkit) — Open-source indicators library (no API key needed)
+- ⭐ Star this repo to help others find it!
 
 ## License
 

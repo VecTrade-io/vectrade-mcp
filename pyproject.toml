@@ -4,14 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vectrade-mcp"
-version = "0.1.0"
-description = "Zero-config MCP setup for VecTrade financial tools in AI IDEs"
+version = "1.0.0"
+description = "Zero-config MCP server for VecTrade financial tools — 27 tools for Claude, Cursor, VS Code Copilot, Windsurf"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [{ name = "VecTrade", email = "sdk@vectrade.io" }]
+keywords = ["mcp", "model-context-protocol", "finance", "ai", "claude", "cursor", "vscode", "copilot", "trading", "stocks", "vectrade"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -32,6 +33,7 @@ Homepage = "https://github.com/VecTrade-io/vectrade-mcp"
 Documentation = "https://docs.vectrade.io/sdks/mcp"
 Repository = "https://github.com/VecTrade-io/vectrade-mcp"
 Issues = "https://github.com/VecTrade-io/vectrade-mcp/issues"
+Changelog = "https://github.com/VecTrade-io/vectrade-mcp/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
