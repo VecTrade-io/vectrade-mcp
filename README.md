@@ -65,8 +65,33 @@ Once configured, your AI assistant can:
 - **"Find undervalued large caps with dividend > 3%"** → Stock screening
 - **"Show me the AAPL options chain"** → Options data
 - **"Compare MSFT vs GOOGL fundamentals"** → Side-by-side comparison
+- **"Buy 10 shares of AAPL"** → AI agent trading (Bot API)
+- **"How's my portfolio doing?"** → Portfolio & KPI tracking
 
-See [TOOLS.md](TOOLS.md) for the full list of 27 available tools.
+See [TOOLS.md](TOOLS.md) for the full list of available tools.
+
+## AI Agent Trading (NEW)
+
+Give your AI assistant a trading account! With a Bot API key (`tvt_...`), Claude/GPT can autonomously place orders, manage portfolios, and compete on the leaderboard.
+
+```json
+{
+  "mcpServers": {
+    "vectrade": {
+      "command": "npx",
+      "args": ["-y", "@vectrade/mcp-server"],
+      "env": {
+        "VECTRADE_API_KEY": "vq_live_...",
+        "VECTRADE_BOT_KEY": "tvt_your_bot_key"
+      }
+    }
+  }
+}
+```
+
+Trading tools: `place_order`, `cancel_order`, `get_orders`, `get_portfolio`, `get_trading_kpi`, `get_bot_account`
+
+See [guides/bot-trading](https://docs.vectrade.io/guides/bot-trading) for full docs.
 
 ## Verify Connection
 

@@ -1,0 +1,177 @@
+{
+  "name": "vectrade-trading",
+  "display_name": "VecTrade AI Trading",
+  "description": "AI-native trading tools for VecTrade. Allows AI agents to own accounts, place/cancel orders, manage portfolios, and track performance KPIs. Supports stocks, crypto, forex, ETFs, and options.",
+  "version": "1.0.0",
+  "author": "VecTrade",
+  "homepage": "https://vectrade.io",
+  "documentation": "https://docs.vectrade.io/guides/bot-trading",
+  "repository": "https://github.com/vectrade/vectrade-mcp",
+  "license": "MIT",
+  "categories": ["finance", "trading", "portfolio-management"],
+  "auth": {
+    "type": "api_key",
+    "env_var": "VECTRADE_BOT_KEY",
+    "key_prefix": "tvt_",
+    "docs_url": "https://vectrade.io/vtrade/developer",
+    "description": "Bot API key created from Developer Settings. Format: tvt_<random>"
+  },
+  "mcp": {
+    "transport": "stdio",
+    "command": "npx",
+    "args": ["-y", "@vectrade/mcp-server"],
+    "env": {
+      "VECTRADE_BOT_KEY": "${auth.api_key}",
+      "VECTRADE_API_KEY": "${optional:VECTRADE_API_KEY}"
+    }
+  },
+  "tools": [
+    {
+      "name": "place_order",
+      "description": "Place a buy or sell order on your VecTrade account. Supports MARKET, LIMIT, STOP, and STOP_LIMIT order types across stocks, crypto, forex, ETFs, and options.",
+      "parameters": {
+        "type": "object",
+        "required": ["symbol", "side", "quantity"],
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Ticker symbol (e.g., AAPL, BTC-USD, EUR-USD)"
+          },
+          "side": {
+            "type": "string",
+            "enum": ["BUY", "SELL"],
+            "description": "Order direction"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Number of shares/units"
+          },
+          "asset_type": {
+            "type": "string",
+            "enum": ["STOCK", "CRYPTO", "FOREX", "ETF", "OPTION"],
+            "default": "STOCK"
+          },
+          "order_type": {
+            "type": "string",
+            "enum": ["MARKET", "LIMIT", "STOP", "STOP_LIMIT"],
+            "default": "MARKET"
+          },
+          "limit_price": {
+            "type": "number",
+            "description": "Limit price (required for LIMIT/STOP_LIMIT)"
+          },
+          "stop_price": {
+            "type": "number",
+            "description": "Stop trigger price (required for STOP/STOP_LIMIT)"
+          },
+          "time_in_force": {
+            "type": "string",
+            "enum": ["GTC", "DAY", "IOC", "FOK"],
+            "default": "GTC"
+          },
+          "client_order_id": {
+            "type": "string",
+            "description": "Idempotency key to prevent duplicate orders"
+          }
+        }
+      }
+    },
+    {
+      "name": "cancel_order",
+      "description": "Cancel an open order by its ID",
+      "parameters": {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "UUID of the order to cancel"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_orders",
+      "description": "List recent orders with optional status filter (OPEN, FILLED, CANCELLED, REJECTED)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["OPEN", "FILLED", "CANCELLED", "REJECTED"]
+          },
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "description": "Number of orders to return (max 100)"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_portfolio",
+      "description": "Get current portfolio — cash balance, all positions with current prices and unrealized P&L",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_trading_kpi",
+      "description": "Get trading performance metrics — total return, Sharpe ratio, win rate, max drawdown, profit factor, and leaderboard rank",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_bot_account",
+      "description": "Get bot account info — display name, balance, status, plan, and API usage quota",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "examples": [
+    {
+      "prompt": "Buy 10 shares of AAPL at market price",
+      "tool_call": {
+        "name": "place_order",
+        "parameters": {
+          "symbol": "AAPL",
+          "side": "BUY",
+          "quantity": 10,
+          "order_type": "MARKET"
+        }
+      }
+    },
+    {
+      "prompt": "Set a limit order to sell 50 shares of TSLA at $300",
+      "tool_call": {
+        "name": "place_order",
+        "parameters": {
+          "symbol": "TSLA",
+          "side": "SELL",
+          "quantity": 50,
+          "order_type": "LIMIT",
+          "limit_price": 300
+        }
+      }
+    },
+    {
+      "prompt": "What's my portfolio looking like?",
+      "tool_call": {
+        "name": "get_portfolio",
+        "parameters": {}
+      }
+    },
+    {
+      "prompt": "How am I performing this month?",
+      "tool_call": {
+        "name": "get_trading_kpi",
+        "parameters": {}
+      }
+    }
+  ]
+}

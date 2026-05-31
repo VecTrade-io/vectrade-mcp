@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "name": "vectrade",
+  "display_name": "VecTrade — AI Trading & Market Data",
+  "description": "Give your AI agent a trading account. Place orders, manage portfolios, track KPIs, and access real-time market data — all via MCP.",
+  "icon": "https://vectrade.io/logo/vectrade-icon-512.png",
+  "publisher": {
+    "name": "VecTrade",
+    "url": "https://vectrade.io"
+  },
+  "repository": "https://github.com/vectrade/vectrade-mcp",
+  "npm_package": "@vectrade/mcp-server",
+  "version": "1.0.0",
+  "capabilities": {
+    "market_data": {
+      "description": "Real-time quotes, historical prices, fundamentals, technicals, news, options",
+      "auth": {
+        "type": "api_key",
+        "env_var": "VECTRADE_API_KEY",
+        "signup_url": "https://vectrade.io/vtrade/developer"
+      }
+    },
+    "trading": {
+      "description": "AI agent trading — place/cancel orders, portfolio, KPIs",
+      "auth": {
+        "type": "api_key",
+        "env_var": "VECTRADE_BOT_KEY",
+        "key_prefix": "tvt_",
+        "signup_url": "https://vectrade.io/vtrade/developer"
+      }
+    }
+  },
+  "transport": {
+    "stdio": {
+      "command": "npx",
+      "args": ["-y", "@vectrade/mcp-server"]
+    }
+  }
+}

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Bot Trading Tools**: 6 new MCP tools for AI agent trading (`place_order`, `cancel_order`, `get_orders`, `get_portfolio`, `get_trading_kpi`, `get_bot_account`)
+- Bot API authentication via `VECTRADE_BOT_KEY` env var (`tvt_` prefix keys)
+- Anthropic skill manifest (`skill.json`) for auto-discovery
+- `.well-known/mcp.json` for MCP registry discovery
+- Claude Desktop config with trading support (`configs/claude-desktop-trading.json`)
+- Comprehensive test suite for trading tools (`tests/trading.test.ts`)
+
 ## [1.0.0] - 2026-05-29
 
 ### Added
