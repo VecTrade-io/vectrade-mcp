@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -159,7 +158,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 def _add_setup_parser(sub: argparse._SubParsersAction) -> None:
     setup = sub.add_parser("setup", help="Write MCP IDE config")
-    setup.add_argument("ide", help="Target IDE (claude-code, cursor, vscode, windsurf, cline, continue, all)")
+    setup.add_argument(
+        "ide",
+        help="Target IDE (claude-code, cursor, vscode, windsurf, cline, continue, all)",
+    )
     setup.add_argument("--api-key", dest="api_key", help="VecTrade API key (vq_...)")
     setup.add_argument("--home", help="Override home directory for config writes")
     setup.set_defaults(func=cmd_setup)
