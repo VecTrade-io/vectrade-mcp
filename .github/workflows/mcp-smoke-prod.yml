@@ -36,7 +36,7 @@ jobs:
           VECTRADE_VQ_API_KEY: ${{ secrets.VECTRADE_PROD_MCP_API_KEY }}
         run: |
           payload='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","clientInfo":{"name":"gha-mcp-smoke","version":"1.0.0"},"capabilities":{}}}'
-          code=$(curl -sS -o init.json -w "%{http_code}" \
+          code=$(curl -sS -D init.headers -o init.json -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
             -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
@@ -52,6 +52,13 @@ jobs:
             mv init.json.parsed init.json
           fi
           jq -e '.result' init.json >/dev/null
+          session_id=$(awk -F': ' 'tolower($1)=="mcp-session-id" {gsub("\r", "", $2); print $2}' init.headers | tail -n 1)
+          if [[ -z "$session_id" ]]; then
+            echo "Missing mcp-session-id header from initialize response" >&2
+            cat init.headers || true
+            exit 1
+          fi
+          echo "MCP_SESSION_ID=$session_id" >> "$GITHUB_ENV"
 
       - name: MCP tools/list
         env:
@@ -61,6 +68,7 @@ jobs:
           code=$(curl -sS -o tools.json -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
+            -H "mcp-session-id: ${MCP_SESSION_ID}" \
             -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
             -d "$payload" \
             https://mcp.vectrade.io/mcp)
@@ -88,6 +96,7 @@ jobs:
           code=$(curl -sS -o call.json -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
+            -H "mcp-session-id: ${MCP_SESSION_ID}" \
             -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
             -d "$payload" \
             https://mcp.vectrade.io/mcp)
