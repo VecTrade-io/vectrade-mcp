@@ -55,6 +55,12 @@ Prepare and keep these assets ready:
 - Privacy URL: `PRIVACY.md` (or hosted docs equivalent)
 - Security URL: `SECURITY.md` (or hosted docs equivalent)
 
+Marketplace manifest files in this repo:
+
+- `.claude-plugin/marketplace.json`
+- `plugins/vectrade-mcp-plugin/.claude-plugin/plugin.json`
+- `plugins/vectrade-mcp-plugin/.mcp.json`
+
 ## 5. Connection Modes to Advertise
 
 ### Recommended: Hosted MCP
@@ -103,3 +109,24 @@ vectrade mcp doctor
 - No Sev-1 auth or key handling incidents
 - Marketplace reviewer feedback resolved
 - Support owner on-call for first launch week
+
+## 9. Community Marketplace Submission (Official Anthropic Flow)
+
+Submit VecTrade plugin for community review via either:
+
+- claude.ai form: https://claude.ai/admin-settings/directory/submissions/plugins/new
+- console form: https://platform.claude.com/plugins/submit
+
+CLI users can install after listing appears in community marketplace:
+
+```bash
+claude plugin marketplace add anthropics/claude-plugins-community
+claude plugin install vectrade-mcp-plugin@claude-community
+```
+
+Until community listing is approved, use direct install from this repo:
+
+```bash
+claude plugin marketplace add VecTrade-io/vectrade-mcp
+claude plugin install vectrade-mcp-plugin@vectrade-tools
+```

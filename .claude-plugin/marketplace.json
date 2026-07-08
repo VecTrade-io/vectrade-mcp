@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "vectrade-tools",
+  "description": "Official VecTrade plugins for Claude Code",
+  "owner": {
+    "name": "VecTrade",
+    "email": "support@vectrade.io"
+  },
+  "plugins": [
+    {
+      "name": "vectrade-mcp-plugin",
+      "displayName": "VecTrade MCP",
+      "description": "Financial market data and trading workflows via VecTrade MCP",
+      "source": "./plugins/vectrade-mcp-plugin",
+      "keywords": ["finance", "trading", "markets", "mcp"],
+      "license": "MIT",
+      "repository": "https://github.com/VecTrade-io/vectrade-mcp"
+    }
+  ]
+}

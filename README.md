@@ -63,6 +63,21 @@ vectrade mcp setup claude-code
 vectrade mcp setup vscode
 ```
 
+### Option 4: Claude CLI marketplace plugin
+
+```bash
+claude plugin marketplace add VecTrade-io/vectrade-mcp
+claude plugin install vectrade-mcp-plugin@vectrade-tools
+```
+
+Set environment variables before use:
+
+```bash
+export VECTRADE_API_KEY=vq_live_...
+# optional for trading tools
+export VECTRADE_BOT_KEY=tvt_...
+```
+
 Compatibility aliases also work:
 
 ```bash
@@ -196,6 +211,7 @@ Operational and policy docs in this repo:
 - [PRIVACY.md](PRIVACY.md)
 - [SUPPORT_SLA.md](SUPPORT_SLA.md)
 - [CLAUDE_CODE_MARKET_SUBMISSION_GUIDE.md](CLAUDE_CODE_MARKET_SUBMISSION_GUIDE.md)
+- [INDUSTRIAL_GRADE_HARDENING_CHECKLIST.md](INDUSTRIAL_GRADE_HARDENING_CHECKLIST.md)
 
 ## Community
 

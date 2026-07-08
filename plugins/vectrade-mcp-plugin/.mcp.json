@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vectrade": {
+      "command": "npx",
+      "args": ["-y", "@vectrade/mcp-server"],
+      "env": {
+        "VECTRADE_API_KEY": "${VECTRADE_API_KEY}",
+        "VECTRADE_BOT_KEY": "${VECTRADE_BOT_KEY}"
+      }
+    }
+  }
+}
