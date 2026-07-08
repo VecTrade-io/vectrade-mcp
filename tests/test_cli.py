@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from io import BytesIO
 import json
-from pathlib import Path
 import urllib.error
+from io import BytesIO
+from pathlib import Path
 
 import pytest
 
@@ -213,7 +213,7 @@ def test_parse_mcp_doctor_namespace() -> None:
     assert args.mcp_command == "doctor"
 
 
-def test_main_dispatch_setup(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_dispatch_setup(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
-    monkeypatch.setattr(cli, "setup_ide", lambda *_args, **_kwargs: Path("/tmp/mcp.json"))
+    monkeypatch.setattr(cli, "setup_ide", lambda *_args, **_kwargs: tmp_path / "mcp.json")
     assert cli.main(["setup", "cursor"]) == 0
