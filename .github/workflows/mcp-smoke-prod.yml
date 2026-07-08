@@ -38,6 +38,7 @@ jobs:
           payload='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","clientInfo":{"name":"gha-mcp-smoke","version":"1.0.0"},"capabilities":{}}}'
           code=$(curl -sS -o init.json -w "%{http_code}" \
             -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
             -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
             -d "$payload" \
             https://mcp.vectrade.io/mcp)
@@ -45,6 +46,10 @@ jobs:
             echo "MCP initialize failed with HTTP $code" >&2
             cat init.json || true
             exit 1
+          fi
+          if grep -q '^data: ' init.json; then
+            sed -n 's/^data: //p' init.json | tail -n 1 > init.json.parsed
+            mv init.json.parsed init.json
           fi
           jq -e '.result' init.json >/dev/null
 
@@ -55,6 +60,7 @@ jobs:
           payload='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
           code=$(curl -sS -o tools.json -w "%{http_code}" \
             -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
             -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
             -d "$payload" \
             https://mcp.vectrade.io/mcp)
@@ -62,6 +68,10 @@ jobs:
             echo "MCP tools/list failed with HTTP $code" >&2
             cat tools.json || true
             exit 1
+          fi
+          if grep -q '^data: ' tools.json; then
+            sed -n 's/^data: //p' tools.json | tail -n 1 > tools.json.parsed
+            mv tools.json.parsed tools.json
           fi
           tool_count=$(jq '.result.tools | length' tools.json)
           if [[ "$tool_count" -lt 1 ]]; then
@@ -77,6 +87,7 @@ jobs:
           payload='{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_assets","arguments":{"q":"apple","limit":3}}}'
           code=$(curl -sS -o call.json -w "%{http_code}" \
             -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
             -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
             -d "$payload" \
             https://mcp.vectrade.io/mcp)
@@ -84,5 +95,9 @@ jobs:
             echo "MCP tools/call failed with HTTP $code" >&2
             cat call.json || true
             exit 1
+          fi
+          if grep -q '^data: ' call.json; then
+            sed -n 's/^data: //p' call.json | tail -n 1 > call.json.parsed
+            mv call.json.parsed call.json
           fi
           jq -e '.result' call.json >/dev/null
