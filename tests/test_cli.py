@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from io import BytesIO
+import json
 from pathlib import Path
+import urllib.error
 
 import pytest
 
@@ -43,6 +46,21 @@ def test_cmd_setup_invalid_key(monkeypatch: pytest.MonkeyPatch) -> None:
     assert cli.cmd_setup(args) == 1
 
 
+def test_cmd_setup_missing_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("VECTRADE_API_KEY", raising=False)
+    parser = cli.build_parser()
+    args = parser.parse_args(["setup", "cursor"])
+    assert cli.cmd_setup(args) == 1
+
+
+def test_cmd_setup_all_no_ides(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "detect_ides", lambda home=None: [])
+    parser = cli.build_parser()
+    args = parser.parse_args(["setup", "all", "--home", str(tmp_path)])
+    assert cli.cmd_setup(args) == 1
+
+
 def test_cmd_doctor_rejects_bot_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VECTRADE_API_KEY", "tvt_example")
     parser = cli.build_parser()
@@ -70,6 +88,117 @@ def test_cmd_doctor_happy_path(monkeypatch: pytest.MonkeyPatch) -> None:
     assert cli.cmd_doctor(args) == 0
 
 
+def test_cmd_doctor_falls_back_to_check_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("VECTRADE_API_KEY", raising=False)
+    monkeypatch.setattr(cli, "check_api_key", lambda: "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "verify_connection", lambda *_args, **_kwargs: {"status": "ok"})
+
+    responses = [
+        {"jsonrpc": "2.0", "id": 1, "result": {"serverInfo": {"name": "vectrade-mcp"}}},
+        {"jsonrpc": "2.0", "id": 2, "result": {"tools": [{"name": "get_quote"}]}},
+    ]
+
+    def _fake_call(_url: str, _key: str, _body: dict, timeout: int = 10):  # noqa: ARG001
+        return responses.pop(0)
+
+    monkeypatch.setattr(cli, "_mcp_call", _fake_call)
+
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 0
+
+
+def test_cmd_doctor_check_api_key_exits(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("VECTRADE_API_KEY", raising=False)
+
+    def _raise_system_exit() -> str:
+        raise SystemExit(1)
+
+    monkeypatch.setattr(cli, "check_api_key", _raise_system_exit)
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
+def test_cmd_doctor_invalid_key_format(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_short")
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
+def test_cmd_doctor_rest_connection_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+
+    def _raise_url_error(*_args, **_kwargs):
+        raise urllib.error.URLError("network down")
+
+    monkeypatch.setattr(cli, "verify_connection", _raise_url_error)
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
+def test_cmd_doctor_initialize_error_response(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "verify_connection", lambda *_args, **_kwargs: {"status": "ok"})
+    monkeypatch.setattr(cli, "_mcp_call", lambda *_args, **_kwargs: {"error": {"message": "boom"}})
+
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
+def test_cmd_doctor_tools_list_empty(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "verify_connection", lambda *_args, **_kwargs: {"status": "ok"})
+
+    responses = [
+        {"jsonrpc": "2.0", "id": 1, "result": {"serverInfo": {"name": "vectrade-mcp"}}},
+        {"jsonrpc": "2.0", "id": 2, "result": {"tools": []}},
+    ]
+
+    def _fake_call(_url: str, _key: str, _body: dict, timeout: int = 10):  # noqa: ARG001
+        return responses.pop(0)
+
+    monkeypatch.setattr(cli, "_mcp_call", _fake_call)
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
+def test_cmd_doctor_http_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "verify_connection", lambda *_args, **_kwargs: {"status": "ok"})
+
+    def _raise_http_error(*_args, **_kwargs):
+        raise urllib.error.HTTPError(
+            url="https://mcp.vectrade.io/mcp",
+            code=401,
+            msg="Unauthorized",
+            hdrs=None,
+            fp=BytesIO(b'{"error":"unauthorized"}'),
+        )
+
+    monkeypatch.setattr(cli, "_mcp_call", _raise_http_error)
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
+def test_cmd_doctor_json_decode_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "verify_connection", lambda *_args, **_kwargs: {"status": "ok"})
+
+    def _raise_json_error(*_args, **_kwargs):
+        raise json.JSONDecodeError("bad json", "x", 0)
+
+    monkeypatch.setattr(cli, "_mcp_call", _raise_json_error)
+    parser = cli.build_parser()
+    args = parser.parse_args(["doctor"])
+    assert cli.cmd_doctor(args) == 1
+
+
 def test_parse_mcp_setup_namespace() -> None:
     parser = cli.build_parser()
     args = parser.parse_args(["mcp", "setup", "claude-code"])
@@ -82,3 +211,9 @@ def test_parse_mcp_doctor_namespace() -> None:
     args = parser.parse_args(["mcp", "doctor"])
     assert args.command == "mcp"
     assert args.mcp_command == "doctor"
+
+
+def test_main_dispatch_setup(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VECTRADE_API_KEY", "vq_live_abcdefghijk")
+    monkeypatch.setattr(cli, "setup_ide", lambda *_args, **_kwargs: Path("/tmp/mcp.json"))
+    assert cli.main(["setup", "cursor"]) == 0
