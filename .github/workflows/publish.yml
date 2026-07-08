@@ -32,15 +32,23 @@ jobs:
       - name: Build Node package
         run: npm run build
 
+      - name: Check npm token availability
+        id: npm-check
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "has_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_token=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ NPM_TOKEN not set — npm publish will be skipped."
+          fi
+
       - name: Publish to npm
-        if: ${{ secrets.NPM_TOKEN != '' }}
+        if: steps.npm-check.outputs.has_token == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
-
-      - name: Skip npm publish (NPM_TOKEN not set)
-        if: ${{ secrets.NPM_TOKEN == '' }}
-        run: echo "⚠️ NPM_TOKEN secret not set — skipping npm publish. Set the secret and re-run to publish to npm."
 
       - uses: actions/setup-python@v6
         with:
