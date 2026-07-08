@@ -91,9 +91,11 @@ function formatPortfolio(p: Record<string, unknown>): string {
     "",
   ];
   for (const pos of positions) {
-    lines.push(
-      `  ${pos.symbol} (${pos.asset_type}): ${pos.quantity} @ $${pos.avg_cost} avg`
-    );
+    const symbol = String(pos.symbol ?? "UNKNOWN");
+    const quantity = String(pos.quantity ?? "0");
+    const avgCost = String(pos.avg_cost ?? "0");
+    lines.push(`  ${symbol}: ${quantity} shares @ $${avgCost} avg`);
+    if (pos.current_price) lines.push(`    Current: $${pos.current_price}`);
     if (pos.market_value) lines.push(`    Market Value: $${pos.market_value}`);
     if (pos.unrealized_pnl) lines.push(`    Unrealized P&L: $${pos.unrealized_pnl}`);
   }

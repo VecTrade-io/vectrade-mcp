@@ -74,6 +74,7 @@ class TestConfigFiles:
     def test_all_expected_configs_exist(self) -> None:
         expected = {
             "claude-desktop",
+            "claude-desktop-trading",
             "cline",
             "continue-dev",
             "cursor",

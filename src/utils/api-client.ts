@@ -11,15 +11,8 @@ import { getRequestApiKey } from "./request-context.js";
 const DEFAULT_BASE_URL = "https://api.vectrade.io/v1/vq/";
 const DEFAULT_TIMEOUT = 30_000;
 
-interface APIResponse<T = unknown> {
-  data: T;
-  status: number;
-}
-
-interface APIError {
-  message: string;
-  code: string;
-  status: number;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 export class VecTradeAPIClient {
@@ -47,8 +40,12 @@ export class VecTradeAPIClient {
   }
 
   private async handleError(response: Response): Promise<never> {
-    const error = await response.json().catch(() => ({}));
-    const message = error.message || error.detail || response.statusText;
+    const parsed = await response.json().catch(() => ({}));
+    const error = isRecord(parsed) ? parsed : {};
+    const message =
+      (typeof error.message === "string" && error.message) ||
+      (typeof error.detail === "string" && error.detail) ||
+      response.statusText;
     throw new Error(`VecTrade API error (${response.status}): ${message}`);
   }
 
@@ -74,7 +71,8 @@ export class VecTradeAPIClient {
 
     if (!response.ok) await this.handleError(response);
 
-    const body = await response.json();
+    const parsed = await response.json();
+    const body = isRecord(parsed) ? parsed : { data: parsed };
     return (body.data ?? body) as T;
   }
 
@@ -95,7 +93,8 @@ export class VecTradeAPIClient {
 
     if (!response.ok) await this.handleError(response);
 
-    const body = await response.json();
+    const parsed = await response.json();
+    const body = isRecord(parsed) ? parsed : { data: parsed };
     return (body.data ?? body) as T;
   }
 }

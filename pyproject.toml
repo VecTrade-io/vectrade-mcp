@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vectrade-mcp"
-version = "1.0.0"
+version = "1.1.0"
 description = "Zero-config MCP server for VecTrade financial tools — 27 tools for Claude, Cursor, VS Code Copilot, Windsurf"
 readme = "README.md"
 license = "MIT"
@@ -27,6 +27,8 @@ classifiers = [
 [project.scripts]
 vectrade-mcp-setup = "vectrade_mcp.setup_wizard:main"
 vectrade-mcp-verify = "vectrade_mcp.verify:main"
+vectrade-mcp-doctor = "vectrade_mcp.doctor:main"
+vectrade = "vectrade_mcp.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/VecTrade-io/vectrade-mcp"

@@ -19,6 +19,13 @@ Or with [uvx](https://docs.astral.sh/uv/):
 uvx vectrade-mcp-setup
 ```
 
+To use the unified CLI directly after install:
+
+```bash
+vectrade mcp setup claude-code
+vectrade mcp doctor
+```
+
 For development:
 
 ```bash
@@ -52,8 +59,15 @@ Copy the appropriate config for your IDE:
 
 ```bash
 vectrade mcp setup cursor
-vectrade mcp setup claude
+vectrade mcp setup claude-code
 vectrade mcp setup vscode
+```
+
+Compatibility aliases also work:
+
+```bash
+vectrade mcp setup claude
+vectrade setup claude-code
 ```
 
 ## What You Get
@@ -97,9 +111,15 @@ See [guides/bot-trading](https://docs.vectrade.io/guides/bot-trading) for full d
 
 ```bash
 export VECTRADE_API_KEY=vq_live_...
+vectrade mcp doctor
+```
+
+Legacy verification command is still available:
+
+```bash
 python -m vectrade_mcp.verify
-# or, if installed:
 vectrade-mcp-verify
+vectrade-mcp-doctor
 ```
 
 ## Development
@@ -169,6 +189,13 @@ docker run -p 3200:3200 -e VECTRADE_API_KEY=vq_live_... vectrade-mcp
 ## Documentation
 
 Full docs at [docs.vectrade.io/mcp](https://docs.vectrade.io/sdks/mcp).
+
+Operational and policy docs in this repo:
+
+- [MCP_RUNBOOK.md](MCP_RUNBOOK.md)
+- [PRIVACY.md](PRIVACY.md)
+- [SUPPORT_SLA.md](SUPPORT_SLA.md)
+- [CLAUDE_CODE_MARKET_SUBMISSION_GUIDE.md](CLAUDE_CODE_MARKET_SUBMISSION_GUIDE.md)
 
 ## Community
 

@@ -5,7 +5,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getClient } from "../utils/api-client.js";
-import { formatGeneric } from "../utils/formatters.js";
 
 export function registerNewsTools(server: McpServer): void {
   server.tool(

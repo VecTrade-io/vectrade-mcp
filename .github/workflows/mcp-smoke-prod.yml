@@ -1,0 +1,88 @@
+name: MCP Smoke (Prod)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate secret presence
+        env:
+          VECTRADE_VQ_API_KEY: ${{ secrets.VECTRADE_PROD_MCP_API_KEY }}
+        run: |
+          if [[ -z "$VECTRADE_VQ_API_KEY" ]]; then
+            echo "Missing secret VECTRADE_PROD_MCP_API_KEY" >&2
+            exit 1
+          fi
+          if [[ "$VECTRADE_VQ_API_KEY" == tvt_* ]]; then
+            echo "Invalid key prefix: got bot key (tvt_), expected VQ key (vq_)" >&2
+            exit 1
+          fi
+
+      - name: MCP initialize
+        env:
+          VECTRADE_VQ_API_KEY: ${{ secrets.VECTRADE_PROD_MCP_API_KEY }}
+        run: |
+          payload='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","clientInfo":{"name":"gha-mcp-smoke","version":"1.0.0"},"capabilities":{}}}'
+          code=$(curl -sS -o init.json -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
+            -d "$payload" \
+            https://mcp.vectrade.io/mcp)
+          if [[ "$code" != "200" ]]; then
+            echo "MCP initialize failed with HTTP $code" >&2
+            cat init.json || true
+            exit 1
+          fi
+          jq -e '.result' init.json >/dev/null
+
+      - name: MCP tools/list
+        env:
+          VECTRADE_VQ_API_KEY: ${{ secrets.VECTRADE_PROD_MCP_API_KEY }}
+        run: |
+          payload='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+          code=$(curl -sS -o tools.json -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
+            -d "$payload" \
+            https://mcp.vectrade.io/mcp)
+          if [[ "$code" != "200" ]]; then
+            echo "MCP tools/list failed with HTTP $code" >&2
+            cat tools.json || true
+            exit 1
+          fi
+          tool_count=$(jq '.result.tools | length' tools.json)
+          if [[ "$tool_count" -lt 1 ]]; then
+            echo "MCP tools/list returned zero tools" >&2
+            cat tools.json || true
+            exit 1
+          fi
+
+      - name: MCP tools/call search_assets
+        env:
+          VECTRADE_VQ_API_KEY: ${{ secrets.VECTRADE_PROD_MCP_API_KEY }}
+        run: |
+          payload='{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_assets","arguments":{"q":"apple","limit":3}}}'
+          code=$(curl -sS -o call.json -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: ${VECTRADE_VQ_API_KEY}" \
+            -d "$payload" \
+            https://mcp.vectrade.io/mcp)
+          if [[ "$code" != "200" ]]; then
+            echo "MCP tools/call failed with HTTP $code" >&2
+            cat call.json || true
+            exit 1
+          fi
+          jq -e '.result' call.json >/dev/null

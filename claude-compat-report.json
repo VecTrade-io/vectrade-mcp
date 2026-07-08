@@ -1,0 +1,80 @@
+{
+  "started_at": "2026-07-08T10:54:57.140Z",
+  "args": {
+    "transport": "both",
+    "url": "https://mcp.vectrade.io/mcp",
+    "out": "claude-compat-report.json"
+  },
+  "env": {
+    "has_api_key": false,
+    "has_bot_key": false
+  },
+  "checks": [
+    {
+      "name": "claude_desktop_config_shape",
+      "ok": true,
+      "detail": "configs/claude-desktop.json has valid vectrade MCP server command args"
+    },
+    {
+      "name": "skill_manifest_mcp_runnable",
+      "ok": true,
+      "detail": "skill.json contains a runnable stdio MCP stanza"
+    },
+    {
+      "name": "skill_manifest_claude_native_plugin",
+      "ok": false,
+      "detail": "skill.json is not a guaranteed Claude-native plugin manifest format; treat as metadata and provide Claude MCP config as the deployment source of truth"
+    },
+    {
+      "name": "credential_api_key",
+      "ok": false,
+      "detail": "VECTRADE_API_KEY is required for hosted and market-data tool tests"
+    },
+    {
+      "name": "hosted_connect",
+      "ok": false,
+      "detail": "Skipped hosted tests because VECTRADE_API_KEY is not set"
+    },
+    {
+      "name": "stdio_connect",
+      "ok": true,
+      "detail": "Connected to local stdio server (node dist/index.js)"
+    },
+    {
+      "name": "stdio_tool_discovery",
+      "ok": true,
+      "detail": "All required tools discovered (5)"
+    },
+    {
+      "name": "stdio_tool_get_quote",
+      "ok": false,
+      "detail": "latency_ms=1; sample=API key required. Pass X-API-Key header (hosted) or set VECTRADE_API_KEY env var (local). Get a free key at https://vectrade.io/vtrade/developer"
+    },
+    {
+      "name": "stdio_tool_get_news",
+      "ok": false,
+      "detail": "latency_ms=1; sample=API key required. Pass X-API-Key header (hosted) or set VECTRADE_API_KEY env var (local). Get a free key at https://vectrade.io/vtrade/developer"
+    },
+    {
+      "name": "stdio_tool_get_technicals",
+      "ok": false,
+      "detail": "latency_ms=0; sample=API key required. Pass X-API-Key header (hosted) or set VECTRADE_API_KEY env var (local). Get a free key at https://vectrade.io/vtrade/developer"
+    },
+    {
+      "name": "stdio_tool_get_portfolio",
+      "ok": false,
+      "detail": "VECTRADE_BOT_KEY not set; cannot validate portfolio/trading endpoints"
+    },
+    {
+      "name": "stdio_tool_get_trading_kpi",
+      "ok": false,
+      "detail": "VECTRADE_BOT_KEY not set; cannot validate portfolio/trading endpoints"
+    }
+  ],
+  "finished_at": "2026-07-08T10:54:57.262Z",
+  "summary": {
+    "passed": 4,
+    "failed": 8,
+    "total": 12
+  }
+}
