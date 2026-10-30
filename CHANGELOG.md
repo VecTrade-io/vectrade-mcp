@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **TypeScript linting** — configure ESLint 9 with the TypeScript parser so the package lint script can run.
+- **MCP CI coverage** — validate the Node package's lint, typecheck, build, tests, and production dependencies alongside the existing Python checks.
+- **Test dependency security** — upgrade Vitest and esbuild to patched lines; Node CI and publish builds now use Node 22.
+
 ## [1.1.0] - 2026-07-08
 
 ### Added
