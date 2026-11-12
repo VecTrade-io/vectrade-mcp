@@ -129,7 +129,7 @@ export function registerTradingTools(server: McpServer): void {
     "place_order",
     "Place a trade order (buy/sell) on your VecTrade account. Supports market, limit, stop, and stop-limit orders.",
     {
-      symbol: z.string().describe("Ticker symbol (e.g., AAPL, BTC-USD, EUR-USD)"),
+      symbol: z.string().describe("Ticker symbol (e.g., AAPL, BTC-USD, EURUSD=X)"),
       side: z.enum(["BUY", "SELL"]).describe("Order side"),
       quantity: z.number().positive().describe("Number of shares/units to trade"),
       asset_type: z

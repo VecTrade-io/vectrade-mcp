@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Forex symbol guidance** - trading tools now document the canonical `EURUSD=X` format required by core.
 - **TypeScript linting** — configure ESLint 9 with the TypeScript parser so the package lint script can run.
 - **MCP CI coverage** — validate the Node package's lint, typecheck, build, tests, and production dependencies alongside the existing Python checks.
 - **Test dependency security** — upgrade Vitest and esbuild to patched lines; Node CI and publish builds now use Node 22.
